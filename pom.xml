@@ -16,6 +16,7 @@
         <xz.version>1.9</xz.version>
         <zstd.version>1.5.2-1</zstd.version>
         <version.junit.jupiter>5.9.2</version.junit.jupiter>
+        <version.jacoco>0.8.8</version.jacoco>
     </properties>
 
     <parent>
@@ -76,17 +77,58 @@
             <version>${version.junit.jupiter}</version>
             <scope>test</scope>
         </dependency>
-<!--        &lt;!&ndash; For inline mocking final / spy classes like Record ]&ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>org.mockito</groupId>-->
-<!--            <artifactId>mockito-inline</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
 
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <!-- Plugin for code coverage using SonarQube -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${version.jacoco}</version>
+                <configuration>
+                    <propertyName>coverageAgent</propertyName>
+                    <append>true</append>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>pre-unit-test</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>surefireArgLine</propertyName>
+                            <append>true</append>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-unit-test</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>false</skip>
+                    <argLine>${surefireArgLine}</argLine>
+                    <forkCount>1</forkCount>
+                    <!-- Change this according to your CCM configuration delivery path -->
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
