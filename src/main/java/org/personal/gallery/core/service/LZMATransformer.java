@@ -20,7 +20,6 @@ import static org.personal.gallery.utils.ApplicationConstants.LZMA;
 @Component
 public class LZMATransformer implements BaseTransformer {
     private final Logger logger = LoggerFactory.getLogger(LZMATransformer.class);
-    private static final ObjectMapper mapper = JsonMapper.builder().addModule(new AfterburnerModule()).build();
 
     @Override
     public String getCompressionType() {
@@ -33,7 +32,7 @@ public class LZMATransformer implements BaseTransformer {
 
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
              XZOutputStream xzOutputStream = new XZOutputStream(byteArrayOutputStream, new LZMA2Options())) {
-            xzOutputStream.write(mapper.writeValueAsBytes(payloadBytes));
+            xzOutputStream.write(payloadBytes);
             xzOutputStream.finish();
             byte[] compressedBytes = byteArrayOutputStream.toByteArray();
             return Base64.getEncoder().encodeToString(compressedBytes);
@@ -54,7 +53,7 @@ public class LZMATransformer implements BaseTransformer {
 
         } catch (IOException e) {
             logger.error("error in de-compressing the data", e);
-            throw new TransformationException("Error in de-compressing with GZIP");
+            throw new TransformationException("Error in de-compressing with LZMA");
         }
     }
 }
