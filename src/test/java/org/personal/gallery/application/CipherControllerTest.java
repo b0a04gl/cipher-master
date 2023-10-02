@@ -1,7 +1,6 @@
 package org.personal.gallery.application;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,17 +15,15 @@ import org.personal.gallery.exceptions.InvalidRequestException;
 import org.personal.gallery.utils.TestUtils;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MockMvcBuilder;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Objects;
+
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.web.servlet.function.RequestPredicates.contentType;
 
 @ExtendWith(MockitoExtension.class)
 class CipherControllerTest {
@@ -51,14 +48,16 @@ class CipherControllerTest {
 
     @Test
     void shouldHandleCompressRequest() throws Exception {
+        //Arrange
         var request = MockMvcRequestBuilders
                 .post("/cipher/compress")
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(TestUtils.getInputAsString("classpath:SampleCompressCipherRequest.json"));
-
+        //act
         var resultActions = mockMvc.perform(request).andDo(print());
 
+        //assert
         resultActions.andExpect(status().isOk());
         Mockito.verify(requestValidator, Mockito.times(1)).validateRequest(any(CipherRequest.class));
         Mockito.verify(cipherService, Mockito.times(1)).handleRequest(any(CipherRequest.class), any(Integer.class));
@@ -96,6 +95,6 @@ class CipherControllerTest {
 
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(result -> Assertions.assertTrue( result.getResolvedException() instanceof InvalidRequestException))
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException().getMessage().equals("missing mandatory headers")));
+                .andExpect(result -> Assertions.assertEquals("missing mandatory headers", Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
 }
