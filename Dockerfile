@@ -1,15 +1,13 @@
-#
-# Build stage
-#
-FROM maven:3.6.0-jdk-17-slim AS build
-COPY src /home/app/src
-COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package
 
-#
-# Package stage
-#
-FROM openjdk:17-jre-slim
-COPY --from=build /home/app/target/*.jar /usr/local/lib/app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","/usr/local/lib/app.jar"]
+FROM maven:3.9.4-eclipse-temurin-17 AS build
+RUN mkdir -p /workspace
+WORKDIR /workspace
+COPY pom.xml /workspace
+COPY src /workspace/src
+RUN mvn -B package --file pom.xml -DskipTests
+
+
+FROM  eclipse-temurin:17-jdk
+COPY --from=build /workspace/target/*jar-with-dependencies.jar app.jar
+EXPOSE 6911
+ENTRYPOINT ["java","-jar","app.jar"]
