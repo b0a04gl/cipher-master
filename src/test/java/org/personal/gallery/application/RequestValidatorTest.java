@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.personal.gallery.core.models.CipherRequest;
 import org.personal.gallery.exceptions.InvalidRequestException;
+import org.personal.gallery.utils.TestUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +28,7 @@ class RequestValidatorTest {
     void shouldValidateRequestAsExpected() {
         var mockRequest = mock(CipherRequest.class);
         when(mockRequest.compressionType()).thenReturn("LZMA");
-        when(mockRequest.payload()).thenReturn("sample payload object");
+        when(mockRequest.payload()).thenReturn(TestUtils.SAMPLE_COMPRESSED_PAYLOAD_GZIP);
 
         var actualResult = requestValidator.validateRequest(mockRequest);
 

@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.personal.gallery.core.models.CipherRequest;
+import org.personal.gallery.core.models.CipherResponse;
 import org.personal.gallery.core.ports.CipherService;
 import org.personal.gallery.exceptions.CustomExceptionHandler;
 import org.personal.gallery.exceptions.InvalidRequestException;
@@ -22,6 +23,7 @@ import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.personal.gallery.utils.TestUtils.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,12 +50,15 @@ class CipherControllerTest {
 
     @Test
     void shouldHandleCompressRequest() throws Exception {
+
         //Arrange
+        when(cipherService.handleRequest(any(CipherRequest.class),any(Integer.class))).thenReturn(CipherResponse.from(""));
+        when(requestValidator.validateRequest(any(CipherRequest.class))).thenReturn(Boolean.TRUE);
         var request = MockMvcRequestBuilders
                 .post("/cipher/compress")
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.getInputAsString("classpath:SampleCompressCipherRequest.json"));
+                .content(TestUtils.getInputAsString(COMPRESS_CIPHER_REQUEST_JSON_FILEPATH));
         //act
         var resultActions = mockMvc.perform(request).andDo(print());
 
@@ -66,11 +71,13 @@ class CipherControllerTest {
 
     @Test
     void shouldHandleDecompressRequest() throws Exception {
+        when(cipherService.handleRequest(any(CipherRequest.class),any(Integer.class))).thenReturn(CipherResponse.from(""));
+        when(requestValidator.validateRequest(any(CipherRequest.class))).thenReturn(Boolean.TRUE);
         var request = MockMvcRequestBuilders
                 .post("/cipher/decompress")
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(TestUtils.getInputAsString("classpath:SampleDecompressCipherRequest.json"));
+                .content(TestUtils.getInputAsString(DECOMPRESS_CIPHER_REQUEST_JSON_FILEPATH));
 
 
         var resultActions = mockMvc.perform(request);
@@ -83,7 +90,7 @@ class CipherControllerTest {
     @Test
     void shouldThrowExceptionForInvalidRequest() throws Exception {
         when(requestValidator.validateRequest(any(CipherRequest.class))).thenThrow(new InvalidRequestException("missing mandatory headers"));
-        String inputAsString = TestUtils.getInputAsString("classpath:SampleInvalidRequest.json");
+        String inputAsString = TestUtils.getInputAsString(INVALID_CIPHER_REQUEST_JSON_FILEPATH);
         var request = MockMvcRequestBuilders
                 .post("/cipher/compress")
                 .characterEncoding("utf-8")
